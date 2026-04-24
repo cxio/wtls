@@ -938,6 +938,12 @@ type Config struct {
 	// 工作量验证应在此回调中完成；回调可阻塞直至验证结束。
 	// 仅在 TLS 1.3 握手中生效。
 	VerifyClientRandom func(ctx context.Context, random []byte) error
+
+	// GetEncryptedExtensionsData 如果非 nil，在服务端即将发送 EncryptedExtensions 前调用。
+	// 返回 zeroBits（二级 PoW 难度）和 shareNodes（节点信息清单）。
+	// zeroBits 为 0 表示不启用二级 PoW；shareNodes 为 nil 表示不下发节点信息。
+	// 仅在 TLS 1.3 握手中生效。
+	GetEncryptedExtensionsData func(info *ClientHelloInfo) (zeroBits uint8, shareNodes []byte)
 }
 
 // EncryptedClientHelloKey holds a private key that is associated
