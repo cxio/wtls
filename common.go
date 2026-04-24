@@ -332,6 +332,14 @@ type ConnectionState struct {
 	// testingOnlyPeerSignatureAlgorithm is the signature algorithm used by the
 	// peer to sign the handshake. It is not set for resumed connections.
 	testingOnlyPeerSignatureAlgorithm SignatureScheme
+
+	// WTLSZeroBits 是服务端通过 EncryptedExtensions 下发的二级 PoW 难度值。
+	// 值为 0 表示服务端未设置或不启用二级 PoW。
+	WTLSZeroBits uint8
+
+	// WTLSShareNodes 是服务端首次分享的节点信息清单（原始字节）。
+	// 空切片表示服务端未下发节点信息。
+	WTLSShareNodes []byte
 }
 
 // ExportKeyingMaterial returns length bytes of exported key material in a new

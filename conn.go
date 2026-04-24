@@ -99,6 +99,10 @@ type Conn struct {
 	// clientProtocol is the negotiated ALPN protocol.
 	clientProtocol string
 
+	// wTLS 扩展：服务端下发的自定义字段
+	wtlsZeroBits   uint8
+	wtlsShareNodes []byte
+
 	// input/output
 	in, out   halfConn
 	rawInput  bytes.Buffer // raw input, starting with a record header
@@ -1651,6 +1655,8 @@ func (c *Conn) connectionStateLocked() ConnectionState {
 		state.ekm = c.ekm
 	}
 	state.ECHAccepted = c.echAccepted
+	state.WTLSZeroBits = c.wtlsZeroBits
+	state.WTLSShareNodes = c.wtlsShareNodes
 	return state
 }
 

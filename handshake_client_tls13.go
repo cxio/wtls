@@ -584,6 +584,10 @@ func (hs *clientHandshakeStateTLS13) readServerParameters() error {
 		}
 	}
 
+	// wTLS: 读取服务端自定义扩展字段，暂存至 Conn 供调用方通过 ConnectionState 访问。
+	c.wtlsZeroBits = encryptedExtensions.zeroBits
+	c.wtlsShareNodes = encryptedExtensions.shareNodes
+
 	return nil
 }
 
