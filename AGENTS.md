@@ -67,3 +67,10 @@ module github.com/cxio/wtls
 go 1.26.2
 依赖: golang.org/x/crypto v0.50.0, golang.org/x/sys v0.43.0
 ```
+
+## 收尾工作
+
+每次完成 docs/plans/ 下的实现计划后：
+
+- 将被修改的文件列入 docs/modified/ 下的同名文件中，包含简要说明。
+- 若有必要，补充 README.md 中的使用说明和示例代码。

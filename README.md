@@ -48,4 +48,78 @@
 
 ## 使用
 
-（在项目完成后更新）
+```go
+import "github.com/cxio/wtls"
+```
+
+### 客户端：注入工作量证明到 ClientHello.random
+
+```go
+cfg := &wtls.Config{
+    // 在 ClientHello 发出前，将外部计算的 PoW 写入 random 字段。
+    // 若返回值长度不为 32，保持原始随机值不变。
+    GetClientRandom: func(random []byte) []byte {
+        pow := computePoW(random) // 调用方自行实现
+        return pow                // 必须恰好 32 字节
+    },
+}
+conn, err := wtls.Dial("tcp", "example.com:443", cfg)
+```
+
+### 客户端：读取服务端下发的自定义扩展字段
+
+```go
+conn, err := wtls.Dial("tcp", "example.com:443", cfg)
+if err != nil { ... }
+
+state := conn.ConnectionState()
+zeroBits  := state.WTLSZeroBits   // uint8，二级 PoW 难度（0 表示未启用）
+shareNodes := state.WTLSShareNodes // []byte，服务端分享的节点信息清单
+```
+
+### 客户端：配置 TLS 指纹规格（模拟浏览器等）
+
+```go
+cfg := &wtls.Config{
+    // 覆盖 ClientHello 中的指纹相关字段，模拟特定客户端实现。
+    // 未设置（nil/零值）的字段保持默认值不变。
+    ClientHelloSpec: &wtls.ClientHelloSpec{
+        CipherSuites:                 []uint16{wtls.TLS_AES_128_GCM_SHA256, wtls.TLS_AES_256_GCM_SHA384},
+        SupportedCurves:              []wtls.CurveID{wtls.X25519, wtls.CurveP256},
+        SupportedSignatureAlgorithms: []wtls.SignatureScheme{wtls.ECDSAWithP256AndSHA256},
+        KeyShareCurves:               []wtls.CurveID{wtls.X25519}, // 只为该曲线生成 key share
+    },
+}
+```
+
+### 服务端：验证 ClientHello.random 中的工作量
+
+```go
+cfg := &wtls.Config{
+    Certificates: []wtls.Certificate{cert},
+
+    // 在 ECDH 密钥交换之前调用，可阻塞直至验证完成。
+    // 返回非 nil error 将向客户端发送 handshake_failure 并中断握手。
+    VerifyClientRandom: func(ctx context.Context, random []byte) error {
+        if !verifyPoW(random) { // 调用方自行实现
+            return errors.New("invalid proof of work")
+        }
+        return nil
+    },
+}
+ln, _ := wtls.Listen("tcp", ":443", cfg)
+```
+
+### 服务端：向 EncryptedExtensions 注入自定义字段
+
+```go
+cfg := &wtls.Config{
+    Certificates: []wtls.Certificate{cert},
+
+    // 在发送 EncryptedExtensions 前调用，返回值将注入到加密扩展中。
+    // zeroBits 为 0 表示不启用二级 PoW；shareNodes 为 nil 表示不下发节点信息。
+    GetEncryptedExtensionsData: func(info *wtls.ClientHelloInfo) (zeroBits uint8, shareNodes []byte) {
+        return 20, getShareNodes(info) // 调用方自行实现
+    },
+}
+```
