@@ -1006,6 +1006,9 @@ type encryptedExtensionsMsg struct {
 	earlyData               bool
 	echRetryConfigs         []byte
 	serverNameAck           bool
+	// wTLS 扩展字段
+	zeroBits   uint8  // 二级 PoW 难度值（前置零位长度），0 表示不启用
+	shareNodes []byte // 服务端首次分享的节点信息清单
 }
 
 func (m *encryptedExtensionsMsg) marshal() ([]byte, error) {
@@ -1044,6 +1047,18 @@ func (m *encryptedExtensionsMsg) marshal() ([]byte, error) {
 			if m.serverNameAck {
 				b.AddUint16(extensionServerName)
 				b.AddUint16(0) // empty extension_data
+			}
+			if m.zeroBits > 0 {
+				b.AddUint16(extensionWTLSZeroBits)
+				b.AddUint16LengthPrefixed(func(b *cryptobyte.Builder) {
+					b.AddUint8(m.zeroBits)
+				})
+			}
+			if len(m.shareNodes) > 0 {
+				b.AddUint16(extensionWTLSShareNodes)
+				b.AddUint16LengthPrefixed(func(b *cryptobyte.Builder) {
+					b.AddBytes(m.shareNodes)
+				})
 			}
 		})
 	})
@@ -1105,6 +1120,15 @@ func (m *encryptedExtensionsMsg) unmarshal(data []byte) bool {
 				return false
 			}
 			m.serverNameAck = true
+		case extensionWTLSZeroBits:
+			if !extData.ReadUint8(&m.zeroBits) {
+				return false
+			}
+		case extensionWTLSShareNodes:
+			m.shareNodes = make([]byte, len(extData))
+			if !extData.CopyBytes(m.shareNodes) {
+				return false
+			}
 		default:
 			// Ignore unknown extensions.
 			continue
