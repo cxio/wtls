@@ -912,6 +912,13 @@ type Config struct {
 	// autoSessionTicketKeys is like sessionTicketKeys but is owned by the
 	// auto-rotation logic. See Config.ticketKeys.
 	autoSessionTicketKeys []ticketKey
+
+	// GetClientRandom 如果非 nil，在 ClientHello 即将发出前被调用。
+	// 参数 random 是已生成的 32 字节随机值（由 Config.Rand 填充）。
+	// 返回值将替换原始 random；若返回 nil 或长度不为 32，则保持原值不变。
+	// 仅在 TLS 1.3 握手中生效；ECH 模式下针对 inner hello 调用。
+	// 工作量证明（PoW）的计算应在此回调中完成或触发。
+	GetClientRandom func(random []byte) []byte
 }
 
 // EncryptedClientHelloKey holds a private key that is associated
