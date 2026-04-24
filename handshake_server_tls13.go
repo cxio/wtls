@@ -818,6 +818,11 @@ func (hs *serverHandshakeStateTLS13) sendServerParameters() error {
 		}
 	}
 
+	// wTLS: 注入自定义 EncryptedExtensions 字段（若已配置）
+	if fn := c.config.GetEncryptedExtensionsData; fn != nil {
+		encryptedExtensions.zeroBits, encryptedExtensions.shareNodes = fn(clientHelloInfo(hs.ctx, c, hs.clientHello))
+	}
+
 	if _, err := hs.c.writeHandshakeRecord(encryptedExtensions, hs.transcript); err != nil {
 		return err
 	}

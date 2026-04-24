@@ -1067,6 +1067,9 @@ func (c *Config) Clone() *Config {
 		EncryptedClientHelloKeys:            c.EncryptedClientHelloKeys,
 		sessionTicketKeys:                   c.sessionTicketKeys,
 		autoSessionTicketKeys:               c.autoSessionTicketKeys,
+		GetClientRandom:                     c.GetClientRandom,
+		VerifyClientRandom:                  c.VerifyClientRandom,
+		GetEncryptedExtensionsData:          c.GetEncryptedExtensionsData,
 	}
 }
 
