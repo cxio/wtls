@@ -931,6 +931,13 @@ type Config struct {
 	// 仅在 TLS 1.3 握手中生效；ECH 模式下针对 inner hello 调用。
 	// 工作量证明（PoW）的计算应在此回调中完成或触发。
 	GetClientRandom func(random []byte) []byte
+
+	// VerifyClientRandom 如果非 nil，在服务端收到并解析 ClientHello 后调用。
+	// 参数 random 是客户端 ClientHello.random 字段（32 字节，只读）。
+	// 返回非 nil error 将中断握手并向客户端发送 alertHandshakeFailure。
+	// 工作量验证应在此回调中完成；回调可阻塞直至验证结束。
+	// 仅在 TLS 1.3 握手中生效。
+	VerifyClientRandom func(ctx context.Context, random []byte) error
 }
 
 // EncryptedClientHelloKey holds a private key that is associated
