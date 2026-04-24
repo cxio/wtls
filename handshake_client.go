@@ -124,6 +124,9 @@ func (c *Conn) makeClientHello() (*clientHelloMsg, *keySharePrivateKeys, *echCli
 		hello.supportedSignatureAlgorithmsCert = supportedSignatureAlgorithmsCert()
 	}
 
+	// wTLS: 应用 TLS 指纹规格覆盖
+	specKeyShareCurves := applyClientHelloSpec(hello, config.ClientHelloSpec)
+
 	var keyShareKeys *keySharePrivateKeys
 	if maxVersion >= VersionTLS13 {
 		// Reset the list of ciphers when the client only supports TLS 1.3.
@@ -145,6 +148,17 @@ func (c *Conn) makeClientHello() (*clientHelloMsg, *keySharePrivateKeys, *echCli
 		// Since the order is fixed, the first one is always the one to send a
 		// key share for. All the PQ hybrids sort first, and produce a fallback
 		// ECDH share.
+		// wTLS: 若 spec 指定了 KeyShareCurves，将首选曲线放到 supportedCurves 最前。
+		if len(specKeyShareCurves) > 0 {
+			// 构建以 specKeyShareCurves[0] 为首的有序列表
+			preferred := specKeyShareCurves[0]
+			if idx := slices.Index(hello.supportedCurves, preferred); idx > 0 {
+				hello.supportedCurves = append([]CurveID{preferred}, append(hello.supportedCurves[:idx], hello.supportedCurves[idx+1:]...)...)
+			} else if idx < 0 {
+				// 若 spec 曲线不在列表中，插入列表头部
+				hello.supportedCurves = append([]CurveID{preferred}, hello.supportedCurves...)
+			}
+		}
 		curveID := hello.supportedCurves[0]
 		ke, err := keyExchangeForCurveID(curveID)
 		if err != nil {
@@ -1326,4 +1340,28 @@ func computeAndUpdatePSK(m *clientHelloMsg, binderKey []byte, transcript hash.Ha
 	transcript.Write(helloBytes)
 	pskBinders := [][]byte{finishedHash(binderKey, transcript)}
 	return m.updateBinders(pskBinders)
+}
+
+// applyClientHelloSpec 将 spec 中非零字段覆盖到 hello。
+// 返回 keyShareCurves（nil 表示使用默认曲线偏好）。
+func applyClientHelloSpec(hello *clientHelloMsg, spec *ClientHelloSpec) (keyShareCurves []CurveID) {
+	if spec == nil {
+		return nil
+	}
+	if len(spec.CipherSuites) > 0 {
+		hello.cipherSuites = spec.CipherSuites
+	}
+	if len(spec.SupportedCurves) > 0 {
+		hello.supportedCurves = spec.SupportedCurves
+	}
+	if len(spec.SupportedPoints) > 0 {
+		hello.supportedPoints = spec.SupportedPoints
+	}
+	if len(spec.SupportedVersions) > 0 {
+		hello.supportedVersions = spec.SupportedVersions
+	}
+	if len(spec.SupportedSignatureAlgorithms) > 0 {
+		hello.supportedSignatureAlgorithms = spec.SupportedSignatureAlgorithms
+	}
+	return spec.KeyShareCurves // nil 时外层逻辑使用默认曲线
 }
