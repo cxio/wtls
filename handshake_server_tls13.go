@@ -199,6 +199,15 @@ func (hs *serverHandshakeStateTLS13) processClientHello() error {
 	hs.hello.cipherSuite = hs.suite.id
 	hs.transcript = hs.suite.hash.New()
 
+	// wTLS: 在 ECDH 密钥交换之前调用外部 PoW 验证钩子（若已配置）。
+	// 验证失败则立即中断，避免后续昂贵的密钥交换计算。
+	if hook := c.config.VerifyClientRandom; hook != nil {
+		if err := hook(hs.ctx, hs.clientHello.random); err != nil {
+			c.sendAlert(alertHandshakeFailure)
+			return err
+		}
+	}
+
 	// First, if a post-quantum key exchange is available, use one. See
 	// draft-ietf-tls-key-share-prediction-01, Section 4 for why this must be
 	// first.
