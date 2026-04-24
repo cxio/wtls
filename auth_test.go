@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package tls
+package wtls
 
 import (
 	"crypto"
-	"crypto/tls/internal/fips140tls"
 	"os"
 	"testing"
+
+	"github.com/cxio/wtls/internal/fips140tls"
 )
 
 func TestSignatureSelection(t *testing.T) {

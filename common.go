@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package tls
+package wtls
 
 import (
 	"bytes"
@@ -15,11 +15,9 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha512"
-	"crypto/tls/internal/fips140tls"
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"internal/godebug"
 	"io"
 	"net"
 	"runtime"
@@ -28,6 +26,9 @@ import (
 	"sync"
 	"time"
 	_ "unsafe" // for linkname
+
+	"github.com/cxio/wtls/internal/fips140tls"
+	"github.com/cxio/wtls/internal/godebug"
 )
 
 const (

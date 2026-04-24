@@ -2,16 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package tls
+package wtls
 
 import (
 	"bytes"
-	"crypto/internal/fips140/tls13"
 	"crypto/sha256"
 	"encoding/hex"
 	"strings"
 	"testing"
 	"unicode"
+
+	"github.com/cxio/wtls/internal/fips140/tls13"
 )
 
 func TestACVPVectors(t *testing.T) {

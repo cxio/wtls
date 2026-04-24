@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package tls
+package wtls
 
 import (
 	"bytes"
@@ -11,18 +11,19 @@ import (
 	"crypto/hkdf"
 	"crypto/hmac"
 	"crypto/hpke"
-	"crypto/internal/fips140/tls13"
 	"crypto/rsa"
-	"crypto/tls/internal/fips140tls"
 	"crypto/x509"
 	"errors"
 	"fmt"
 	"hash"
-	"internal/byteorder"
 	"io"
 	"slices"
 	"sort"
 	"time"
+
+	"github.com/cxio/wtls/internal/byteorder"
+	"github.com/cxio/wtls/internal/fips140/tls13"
+	"github.com/cxio/wtls/internal/fips140tls"
 )
 
 // maxClientPSKIdentities is the number of client PSK identities the server will

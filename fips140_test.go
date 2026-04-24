@@ -2,20 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package tls
+package wtls
 
 import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
-	"crypto/internal/boring"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
-	"internal/obscuretestdata"
-	"internal/testenv"
 	"math/big"
 	"net"
 	"os"
@@ -23,6 +20,10 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/cxio/wtls/internal/boring"
+	"github.com/cxio/wtls/internal/obscuretestdata"
+	"github.com/cxio/wtls/internal/testenv"
 )
 
 func allCipherSuitesIncludingTLS13() []uint16 {
@@ -118,7 +119,7 @@ func isFIPSCipherSuite(id uint16) bool {
 	case TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
 		TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256:
 		// Only for the native module.
-		return !boring.Enabled
+		return !boring.Enabled()
 	}
 	switch {
 	case strings.Contains(name, "CHACHA20"):
@@ -138,7 +139,7 @@ func isFIPSCurve(id CurveID) bool {
 		return true
 	case X25519MLKEM768, SecP256r1MLKEM768, SecP384r1MLKEM1024:
 		// Only for the native module.
-		return !boring.Enabled
+		return !boring.Enabled()
 	case X25519:
 		return false
 	default:
@@ -169,7 +170,7 @@ func isFIPSSignatureScheme(alg SignatureScheme) bool {
 		return true
 	case Ed25519:
 		// Only for the native module.
-		return !boring.Enabled
+		return !boring.Enabled()
 	case PKCS1WithSHA1, ECDSAWithSHA1:
 		return false
 	default:

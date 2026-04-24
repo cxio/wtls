@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package tls
+package wtls
 
 import (
 	"bytes"
@@ -11,9 +11,7 @@ import (
 	"crypto/ecdh"
 	"crypto/ecdsa"
 	"crypto/elliptic"
-	"crypto/internal/boring"
 	"crypto/rand"
-	"crypto/tls/internal/fips140tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
@@ -21,7 +19,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"internal/testenv"
 	"io"
 	"math"
 	"math/big"
@@ -34,6 +31,10 @@ import (
 	"time"
 
 	"golang.org/x/crypto/cryptobyte"
+
+	"github.com/cxio/wtls/internal/boring"
+	"github.com/cxio/wtls/internal/fips140tls"
+	"github.com/cxio/wtls/internal/testenv"
 )
 
 var rsaCertPEM = `-----BEGIN CERTIFICATE-----
@@ -2000,7 +2001,7 @@ func testVerifyCertificates(t *testing.T, version uint16) {
 }
 
 func TestHandshakeMLKEM(t *testing.T) {
-	if boring.Enabled && fips140tls.Required() {
+	if boring.Enabled() && fips140tls.Required() {
 		t.Skip("ML-KEM not supported in BoringCrypto FIPS mode")
 	}
 	defaultWithPQ := []CurveID{X25519MLKEM768, SecP256r1MLKEM768, SecP384r1MLKEM1024,

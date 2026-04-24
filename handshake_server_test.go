@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package tls
+package wtls
 
 import (
 	"bytes"
@@ -11,7 +11,6 @@ import (
 	"crypto/ecdh"
 	"crypto/elliptic"
 	"crypto/rand"
-	"crypto/tls/internal/fips140tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
@@ -28,6 +27,8 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/cxio/wtls/internal/fips140tls"
 )
 
 func testClientHello(t *testing.T, serverConfig *Config, m handshakeMessage) {

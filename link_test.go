@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package tls
+package wtls
 
 import (
 	"bytes"
-	"internal/testenv"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/cxio/wtls/internal/testenv"
 )
 
 // Tests that the linker is able to remove references to the Client or Server if unused.

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package tls
+package wtls
 
 import (
 	"bytes"
@@ -14,8 +14,6 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
-	"internal/byteorder"
-	"internal/testenv"
 	"io"
 	"log"
 	"net"
@@ -29,6 +27,9 @@ import (
 	"time"
 
 	"golang.org/x/crypto/cryptobyte"
+
+	"github.com/cxio/wtls/internal/byteorder"
+	"github.com/cxio/wtls/internal/testenv"
 )
 
 const boringsslModVer = "v0.0.0-20250620172916-f51d8b099832"

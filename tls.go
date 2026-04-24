@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package tls partially implements TLS 1.2, as specified in RFC 5246,
+// package wtls partially implements TLS 1.2, as specified in RFC 5246,
 // and TLS 1.3, as specified in RFC 8446.
 //
 // # FIPS 140-3 mode
@@ -16,7 +16,7 @@
 // GOFIPS140, and may change across Go versions.
 //
 // [FIPS 140-3 mode]: https://go.dev/doc/security/fips140
-package tls
+package wtls
 
 // BUG(agl): The crypto/tls package only implements some countermeasures
 // against Lucky13 attacks on CBC-mode encryption, and only on SHA1
@@ -33,10 +33,11 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"internal/godebug"
 	"net"
 	"os"
 	"strings"
+
+	"github.com/cxio/wtls/internal/godebug"
 )
 
 // Server returns a new TLS server side connection

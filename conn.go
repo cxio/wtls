@@ -4,7 +4,7 @@
 
 // TLS low level connection and record layer
 
-package tls
+package wtls
 
 import (
 	"bytes"
@@ -15,12 +15,13 @@ import (
 	"errors"
 	"fmt"
 	"hash"
-	"internal/godebug"
 	"io"
 	"net"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/cxio/wtls/internal/godebug"
 )
 
 // A Conn represents a secured connection.

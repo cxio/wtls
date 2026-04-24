@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package tls
+package wtls
 
 import (
 	"crypto"
@@ -15,11 +15,12 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"hash"
-	"internal/cpu"
 	"runtime"
 	_ "unsafe" // for linkname
 
 	"golang.org/x/crypto/chacha20poly1305"
+
+	"github.com/cxio/wtls/internal/cpu"
 )
 
 // CipherSuite is a TLS cipher suite. Note that most functions in this package

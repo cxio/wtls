@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package tls
+package wtls
 
 import (
-	"internal/godebug"
 	"slices"
 	_ "unsafe" // for linkname
+
+	"github.com/cxio/wtls/internal/godebug"
 )
 
 // Defaults are collected in this file to allow distributions to more easily patch

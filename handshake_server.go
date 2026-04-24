@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package tls
+package wtls
 
 import (
 	"context"
@@ -11,13 +11,14 @@ import (
 	"crypto/ed25519"
 	"crypto/rsa"
 	"crypto/subtle"
-	"crypto/tls/internal/fips140tls"
 	"crypto/x509"
 	"errors"
 	"fmt"
 	"hash"
 	"io"
 	"time"
+
+	"github.com/cxio/wtls/internal/fips140tls"
 )
 
 // serverHandshakeState contains details of a server handshake in progress.
