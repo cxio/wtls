@@ -572,6 +572,25 @@ const (
 	RenegotiateFreelyAsClient
 )
 
+// ClientHelloSpec 描述 ClientHello 的指纹规格，用于模拟特定 TLS 客户端实现。
+// 非零字段将覆盖 makeClientHello 的默认值；零值/nil 字段保持不变。
+// 仅在 TLS 1.3 握手中生效。
+type ClientHelloSpec struct {
+	// CipherSuites 覆盖 ClientHello 中通告的加密套件列表（含 TLS 1.3 套件）。
+	CipherSuites []uint16
+	// SupportedCurves 覆盖支持的命名曲线（elliptic curves / named groups）。
+	SupportedCurves []CurveID
+	// SupportedPoints 覆盖支持的点格式（通常为 []uint8{0}，即 uncompressed）。
+	SupportedPoints []uint8
+	// SupportedVersions 覆盖 supported_versions 扩展列表。
+	SupportedVersions []uint16
+	// SupportedSignatureAlgorithms 覆盖签名算法列表。
+	SupportedSignatureAlgorithms []SignatureScheme
+	// KeyShareCurves 指定 key_shares 扩展中实际发送密钥的曲线列表。
+	// 若非 nil，makeClientHello 将只为此列表中的曲线生成 key share。
+	KeyShareCurves []CurveID
+}
+
 // A Config structure is used to configure a TLS client or server.
 // After one has been passed to a TLS function it must not be
 // modified. A Config may be reused; the tls package will also not
@@ -932,6 +951,11 @@ type Config struct {
 	// 工作量证明（PoW）的计算应在此回调中完成或触发。
 	GetClientRandom func(random []byte) []byte
 
+	// ClientHelloSpec 若非 nil，用于覆盖 ClientHello 中的指纹相关字段。
+	// 使用此字段可模拟特定 TLS 客户端（如浏览器）的握手指纹。
+	// 仅在 TLS 1.3 握手中生效。
+	ClientHelloSpec *ClientHelloSpec
+
 	// VerifyClientRandom 如果非 nil，在服务端收到并解析 ClientHello 后调用。
 	// 参数 random 是客户端 ClientHello.random 字段（32 字节，只读）。
 	// 返回非 nil error 将中断握手并向客户端发送 alertHandshakeFailure。
@@ -1068,6 +1092,7 @@ func (c *Config) Clone() *Config {
 		sessionTicketKeys:                   c.sessionTicketKeys,
 		autoSessionTicketKeys:               c.autoSessionTicketKeys,
 		GetClientRandom:                     c.GetClientRandom,
+		ClientHelloSpec:                     c.ClientHelloSpec,
 		VerifyClientRandom:                  c.VerifyClientRandom,
 		GetEncryptedExtensionsData:          c.GetEncryptedExtensionsData,
 	}
