@@ -127,9 +127,13 @@ const (
 	extensionSignatureAlgorithmsCert uint16 = 50
 	extensionKeyShare                uint16 = 51
 	extensionQUICTransportParameters uint16 = 57
-	extensionRenegotiationInfo       uint16 = 0xff01
+	extensionRenegotiationInfo      uint16 = 0xff01
 	extensionECHOuterExtensions      uint16 = 0xfd00
 	extensionEncryptedClientHello    uint16 = 0xfe0d
+
+	// wTLS 私有扩展（TLS 私有使用范围 0xFF01-0xFFFF）
+	extensionWTLSZeroBits   uint16 = 0xFF10 // EncryptedExtensions 中的二级 PoW 难度值
+	extensionWTLSShareNodes uint16 = 0xFF11 // EncryptedExtensions 中的节点信息清单
 )
 
 // TLS signaling cipher suite values
