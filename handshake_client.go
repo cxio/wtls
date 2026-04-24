@@ -234,6 +234,14 @@ func (c *Conn) clientHandshake(ctx context.Context) (err error) {
 		return err
 	}
 
+	// 若配置了 GetClientRandom，允许外部替换 ClientHello.random（用于 PoW 注入）。
+	// ECH 模式下，此处修改的是 inner hello（真实握手内容）的 random。
+	if c.config.GetClientRandom != nil {
+		if r := c.config.GetClientRandom(hello.random); len(r) == 32 {
+			hello.random = r
+		}
+	}
+
 	session, earlySecret, binderKey, err := c.loadSession(hello)
 	if err != nil {
 		return err
