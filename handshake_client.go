@@ -124,9 +124,6 @@ func (c *Conn) makeClientHello() (*clientHelloMsg, *keySharePrivateKeys, *echCli
 		hello.supportedSignatureAlgorithmsCert = supportedSignatureAlgorithmsCert()
 	}
 
-	// wTLS: 应用 TLS 指纹规格覆盖
-	specKeyShareCurves := applyClientHelloSpec(hello, config.ClientHelloSpec)
-
 	var keyShareKeys *keySharePrivateKeys
 	if maxVersion >= VersionTLS13 {
 		// Reset the list of ciphers when the client only supports TLS 1.3.
@@ -141,7 +138,13 @@ func (c *Conn) makeClientHello() (*clientHelloMsg, *keySharePrivateKeys, *echCli
 		} else {
 			hello.cipherSuites = append(hello.cipherSuites, defaultCipherSuitesTLS13NoAES...)
 		}
+	}
 
+	// wTLS: 应用 TLS 指纹规格覆盖
+	// 移至此处应用，是为了覆盖上述针对 TLS 1.3 的原生 cipherSuites 追加逻辑。
+	specKeyShareCurves := applyClientHelloSpec(hello, config.ClientHelloSpec)
+
+	if maxVersion >= VersionTLS13 {
 		if len(hello.supportedCurves) == 0 {
 			return nil, nil, nil, errors.New("tls: no supported elliptic curves for ECDHE")
 		}
@@ -153,7 +156,9 @@ func (c *Conn) makeClientHello() (*clientHelloMsg, *keySharePrivateKeys, *echCli
 			// 构建以 specKeyShareCurves[0] 为首的有序列表
 			preferred := specKeyShareCurves[0]
 			if idx := slices.Index(hello.supportedCurves, preferred); idx > 0 {
-				hello.supportedCurves = append([]CurveID{preferred}, append(hello.supportedCurves[:idx], hello.supportedCurves[idx+1:]...)...)
+				// 克隆 supportedCurves 以避免修改 spec.SupportedCurves 或底层的共享数组
+				clone := slices.Clone(hello.supportedCurves)
+				hello.supportedCurves = append([]CurveID{preferred}, append(clone[:idx], clone[idx+1:]...)...)
 			} else if idx < 0 {
 				// 若 spec 曲线不在列表中，插入列表头部
 				hello.supportedCurves = append([]CurveID{preferred}, hello.supportedCurves...)

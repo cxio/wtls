@@ -847,7 +847,7 @@ func TestWarningAlertFlood(t *testing.T) {
 }
 
 func TestCloneFuncFields(t *testing.T) {
-	const expectedCount = 10
+	const expectedCount = 13
 	called := 0
 
 	c1 := Config{
@@ -891,6 +891,18 @@ func TestCloneFuncFields(t *testing.T) {
 			called |= 1 << 9
 			return nil, nil
 		},
+		GetClientRandom: func([]byte) []byte {
+			called |= 1 << 10
+			return nil
+		},
+		VerifyClientRandom: func(context.Context, []byte) error {
+			called |= 1 << 11
+			return nil
+		},
+		GetEncryptedExtensionsData: func(*ClientHelloInfo) (uint8, []byte) {
+			called |= 1 << 12
+			return 0, nil
+		},
 	}
 
 	c2 := c1.Clone()
@@ -905,6 +917,9 @@ func TestCloneFuncFields(t *testing.T) {
 	c2.WrapSession(ConnectionState{}, nil)
 	c2.EncryptedClientHelloRejectionVerify(ConnectionState{})
 	c2.GetEncryptedClientHelloKeys(nil)
+	c2.GetClientRandom(nil)
+	c2.VerifyClientRandom(context.Background(), nil)
+	c2.GetEncryptedExtensionsData(nil)
 
 	if called != (1<<expectedCount)-1 {
 		t.Fatalf("expected %d calls but saw calls %b", expectedCount, called)
